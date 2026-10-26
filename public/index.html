@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Health Screening</title><style>*{box-sizing:border-box}body{margin:0;padding:20px 14px 40px;background:#f4f4f2;color:#1c2430;font-family:Calibri,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
+.card{width:100%;max-width:380px;background:#4d4d4d;border-radius:20px;padding:20px;color:#fff;box-shadow:0 18px 40px -12px rgba(0,0,0,.35)}
+h1{font-size:1.5rem;margin:6px 0 4px;text-align:center}.sub{color:#6b6b6b;text-align:center;margin:0 0 16px;font-weight:700}
+.row{display:flex;border-radius:8px;overflow:hidden;margin-bottom:10px;box-shadow:0 2px 4px rgba(0,0,0,.15)}.row b{background:#8a8a8a;color:#1c2430;flex:0 0 38%;padding:12px;font-size:.9rem;display:flex;align-items:center}
+.row input{flex:1;min-width:0;border:0;padding:12px;font-size:.95rem;font-weight:600;text-align:right;outline:0}.row input:focus{box-shadow:inset 0 0 0 2px #c1611f}
+.btn{width:100%;padding:15px;border:0;border-radius:8px;background:#c1611f;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;margin-top:8px;box-shadow:0 4px 0 #8f470f}
+.btn.alt{background:#8a8a8a;box-shadow:none;font-size:.9rem;padding:11px}.disp{background:#a9cdd2;color:#1c2430;border-radius:10px;padding:14px;text-align:center;margin-bottom:10px}.disp .v{font-size:2.3rem;font-weight:800}
+.pill{display:block;border-radius:10px;padding:12px;text-align:center;font-weight:700;margin-bottom:10px;background:#c9e2e5;color:#1c2430}
+.under{background:#bcd6ee}.normal{background:#b7e3c9}.atrisk,.mid{background:#f3dba0}.obese1{background:#f0b98a}.obese2,.high{background:#e8a49a}.obese3{background:#d98f8f}
+.msg{color:#ffb4a8;text-align:center;min-height:1.2em;margin:4px 0;font-weight:700}.small{font-size:.8rem;color:#e0e0e0}.hide{display:none!important}
+.lang{position:fixed;top:8px;right:8px;background:#fff;border-radius:20px;padding:3px;display:flex;gap:2px;box-shadow:0 2px 8px rgba(0,0,0,.15)}.lang button{border:0;background:0;padding:6px 9px;border-radius:16px;font-weight:700;font-size:.7rem;color:#6b6b6b;cursor:pointer}.lang button.on{background:#c1611f;color:#fff}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:.85rem;line-height:1.35}.chk input{margin-top:3px;width:18px;height:18px}.link{width:100%;border:0;border-radius:6px;padding:9px;font-size:.78rem}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}.ovb{background:#fff;border-radius:18px;padding:26px 22px;width:100%;max-width:320px;text-align:center}.tick{width:64px;height:64px;border-radius:50%;background:#4caf7d;color:#fff;font-size:2.2rem;line-height:64px;margin:0 auto 12px;font-weight:800}.ovt{font-size:1.25rem;font-weight:800;color:#1c2430;margin-bottom:6px}
+</style></head><body>
+<div class="ov hide" id="ov"><div class="ovb"><div class="tick">✓</div><div id="ovT" class="ovt"></div><button class="btn" id="ovB">OK</button></div></div>
+<div class="lang"><button data-l="en">EN</button><button data-l="ms">BM</button><button data-l="zh">中文</button></div>
+<h1 id="tTitle">Health Screening</h1><p class="sub" id="coName">&nbsp;</p>
+<div class="card" id="formCard">
+ <div class="disp"><div class="small" style="color:#3d4a52">BMI</div><div class="v" id="bmiV">0.00</div></div>
+ <span class="pill" id="bmiS">&ndash;</span><span class="pill" id="bpS">&ndash;</span>
+ <input type="text" name="website" id="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px">
+ <div class="row"><b id="lName">Full Name (as per IC)</b><input type="text" id="name" autocomplete="off"></div>
+ <div class="row"><b id="lAge">Age</b><input type="text" id="age" inputmode="numeric" autocomplete="off"></div>
+ <div class="row"><b id="lH">Height (cm)</b><input type="text" id="height" inputmode="decimal" autocomplete="off"></div>
+ <div class="row"><b id="lW">Weight (kg)</b><input type="text" id="weight" inputmode="decimal" autocomplete="off"></div>
+ <div class="row"><b id="lS">Systolic (mmHg)</b><input type="text" id="sys" inputmode="numeric" autocomplete="off"></div>
+ <div class="row"><b id="lD">Diastolic (mmHg)</b><input type="text" id="dia" inputmode="numeric" autocomplete="off"></div>
+ <label class="chk" id="consentBox"><input type="checkbox" id="consent"><span id="tConsent"></span></label>
+ <div class="msg" id="msg"></div>
+ <button class="btn" id="submit">Submit</button>
+</div>
+<div class="card hide" id="doneCard">
+ <h1 id="tThanks" style="color:#fff">Thank you!</h1><p class="small" id="tPartial" style="text-align:center"></p>
+ <div class="small" id="tLink" style="margin-top:12px"></div><input class="link" id="myLink" readonly>
+ <button class="btn alt" id="copyBtn" style="margin-top:6px">Copy link</button>
+ <button class="btn" id="editBtn">Update</button><button class="btn alt" id="nextBtn">Next person</button>
+</div>
+<script>const classify=b=>b<18.5?{l:'Underweight',c:'under'}:b<23?{l:'Normal',c:'normal'}:b<27.5?{l:'Overweight',c:'atrisk'}:b<32.5?{l:'Obese I',c:'obese1'}:b<37.5?{l:'Obese II',c:'obese2'}:{l:'Obese III',c:'obese3'};
+const classifyBP=(s,d)=>s>=180||d>=120?{l:'Hypertensive Crisis',c:'high'}:s>=140||d>=90?{l:'Stage 2 Hypertension',c:'high'}:s>=130||d>=80?{l:'Stage 1 Hypertension',c:'mid'}:s>=120&&d<80?{l:'Elevated BP',c:'mid'}:{l:'Normal BP',c:'normal'};
+const bmiOf=(h,w)=>h&&w?w/((h/100)*(h/100)):null;
+const $=id=>document.getElementById(id);
+const num=v=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:null};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const T={en:{title:'Health Screening',name:'Full Name (as per IC)',age:'Age',h:'Height (cm)',w:'Weight (kg)',s:'Systolic (mmHg)',d:'Diastolic (mmHg)',consent:'I agree that my details are collected and used for this health screening, and that only the screening organiser can view them.',submit:'Submit',save:'Save changes',thanks:'Thank you!',partial:'You can leave some readings blank and add them later.',link:'Save this personal link to add or change your readings later (only for you):',copy:'Copy link',copied:'Copied',edit:'Add / update my readings',next:'Next person',needName:'Please enter your name.',needConsent:'Please tick the consent box.',bad:'Please check the values entered.',pair:'Height and weight must be filled in together, and so must systolic and diastolic.',nolink:'Please use the link or QR code given by the organiser.',okSub:'Submitted successfully!',okUpd:'Updated successfully!',okBtn:'OK',closed:'This screening is closed.',err:'Could not submit. Check your connection and try again.',co:'Company'},
+ms:{title:'Saringan Kesihatan',name:'Nama Penuh (seperti dalam IC)',age:'Umur',h:'Tinggi (cm)',w:'Berat (kg)',s:'Sistolik (mmHg)',d:'Diastolik (mmHg)',consent:'Saya bersetuju butiran saya dikumpul dan digunakan untuk saringan kesihatan ini, dan hanya penganjur saringan boleh melihatnya.',submit:'Hantar',save:'Simpan perubahan',thanks:'Terima kasih!',partial:'Anda boleh biarkan sebahagian bacaan kosong dan tambah kemudian.',link:'Simpan pautan peribadi ini untuk tambah atau ubah bacaan kemudian (hanya untuk anda):',copy:'Salin pautan',copied:'Disalin',edit:'Tambah / kemas kini bacaan',next:'Orang seterusnya',needName:'Sila masukkan nama.',needConsent:'Sila tandakan kotak persetujuan.',bad:'Sila semak nilai yang dimasukkan.',pair:'Tinggi dan berat mesti diisi bersama, begitu juga sistolik dan diastolik.',nolink:'Sila guna pautan atau kod QR daripada penganjur.',okSub:'Berjaya dihantar!',okUpd:'Berjaya dikemas kini!',okBtn:'OK',closed:'Saringan ini telah ditutup.',err:'Gagal menghantar. Semak sambungan dan cuba lagi.',co:'Syarikat'},
+zh:{title:'健康筛查',name:'全名（与身份证一致）',age:'年龄',h:'身高 (cm)',w:'体重 (kg)',s:'收缩压 (mmHg)',d:'舒张压 (mmHg)',consent:'我同意收集并使用我的资料用于本次健康筛查，且只有筛查主办方可以查看。',submit:'提交',save:'保存更改',thanks:'谢谢！',partial:'部分读数可以先留空，稍后再补充。',link:'请保存此专属链接，以便稍后补充或修改读数（仅限本人）：',copy:'复制链接',copied:'已复制',edit:'补充 / 更新读数',next:'下一位',needName:'请输入姓名。',needConsent:'请勾选同意框。',bad:'请检查输入的数值。',pair:'身高和体重必须同时填写，收缩压和舒张压也必须同时填写。',nolink:'请使用主办方提供的链接或二维码。',okSub:'提交成功！',okUpd:'更新成功！',okBtn:'确定',closed:'本次筛查已关闭。',err:'提交失败，请检查网络后重试。',co:'公司'}};
+let lang=localStorage.getItem('lc_lang')||(/^ms/.test(navigator.language)?'ms':/^zh/.test(navigator.language)?'zh':'en');
+const t=k=>T[lang][k]||T.en[k];
+const P=new URLSearchParams(location.search),CID=P.get('c');let rid=P.get('r')||sessionStorage.getItem('lc_rid_'+CID)||null,coName='',isOpen=true;
+const IDS=['name','age','height','weight','sys','dia'];
+function L(){document.documentElement.lang=lang;document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+ $('tTitle').textContent=t('title');[['lName','name'],['lAge','age'],['lH','h'],['lW','w'],['lS','s'],['lD','d'],['tConsent','consent'],['tThanks','thanks'],['tPartial','partial'],['tLink','link'],['copyBtn','copy'],['editBtn','edit'],['nextBtn','next'],['ovB','okBtn']].forEach(([a,b])=>$(a).textContent=t(b));
+ $('submit').textContent=rid?t('save'):t('submit');$('coName').textContent=coName?t('co')+': '+coName:'';}
+function prev(){const b=bmiOf(num($('height').value),num($('weight').value)),s=num($('sys').value),d=num($('dia').value);
+ const bs=$('bmiS'),ps=$('bpS');bs.className='pill';ps.className='pill';
+ if(b){const c=classify(b);$('bmiV').textContent=b.toFixed(2);bs.textContent=c.l;bs.classList.add(c.c)}else{$('bmiV').textContent='0.00';bs.textContent='\u2013'}
+ if(s&&d){const c=classifyBP(s,d);ps.textContent=s+'/'+d+' \u2013 '+c.l;ps.classList.add(c.c)}else ps.textContent='\u2013';}
+const msg=k=>$('msg').textContent=k?t(k):'';
+function fill(r){IDS.forEach(k=>$(k).value=r[k]??'');prev()}
+function show(done){$('formCard').classList.toggle('hide',done);$('doneCard').classList.toggle('hide',!done);
+ if(done){$('myLink').value=location.origin+location.pathname+'?c='+CID+'&r='+rid}}
+async function post(action,extra){const body={action,company:CID,id:rid,consent:$('consent').checked,website:$('hp').value};IDS.forEach(k=>body[k]=$(k).value.trim());
+ const r=await fetch('/api?action='+action,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});return {ok:r.ok,status:r.status,data:await r.json().catch(()=>({}))}}
+async function save(){
+ const name=$('name').value.trim();if(!name)return msg('needName');if(!rid&&!$('consent').checked)return msg('needConsent');
+ const e=k=>$(k).value.trim()==='';if(e('height')!==e('weight')||e('sys')!==e('dia'))return msg('pair');
+ const R={age:[1,120],height:[50,250],weight:[10,400],sys:[50,300],dia:[30,200]};let bad=false;
+ for(const k in R){const v=$(k).value.trim();if(v!==''){const n=num(v);if(n===null||n<R[k][0]||n>R[k][1])bad=true}}
+ const s=num($('sys').value),d=num($('dia').value);if(s&&d&&s<=d)bad=true;if(bad)return msg('bad');msg('');
+ $('submit').disabled=true;
+ try{const upd=!!rid;const r=await post(rid?'update':'submit');
+  if(r.ok&&!r.data.error){if(!rid&&r.data.id){rid=r.data.id;sessionStorage.setItem('lc_rid_'+CID,rid)}L();show(true);pop(upd)}
+  else if(r.status===403)msg('closed');else if(r.data.error==='pair')msg('pair');else if(r.data.error&&r.status===400)msg('bad');else msg('err')}
+ catch(e){msg('err')}$('submit').disabled=false}
+function pop(upd){$('ovT').textContent=t(upd?'okUpd':'okSub');$('ov').classList.remove('hide');window.scrollTo(0,0)}
+function next(){rid=null;sessionStorage.removeItem('lc_rid_'+CID);history.replaceState(null,'','?c='+CID);IDS.forEach(k=>$(k).value='');$('consent').checked=false;$('consentBox').classList.remove('hide');prev();msg('');L();show(false)}
+async function init(){L();
+ document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lc_lang',lang);L()});
+ ['height','weight','sys','dia'].forEach(k=>$(k).addEventListener('input',prev));
+ $('submit').onclick=save;$('ovB').onclick=()=>$('ov').classList.add('hide');$('nextBtn').onclick=next;$('editBtn').onclick=()=>{L();show(false)};
+ $('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText($('myLink').value)}catch(e){$('myLink').select();document.execCommand('copy')}$('copyBtn').textContent=t('copied')};
+ if(!CID){$('formCard').innerHTML='<p>'+t('nolink')+'</p>';return}
+ try{const r=await fetch('/api?action=company&id='+encodeURIComponent(CID));if(!r.ok)throw 0;const c=await r.json();coName=c.name;isOpen=c.open}catch(e){$('formCard').innerHTML='<p>'+t('nolink')+'</p>';return}
+ if(!isOpen){$('formCard').innerHTML='<p>'+t('closed')+'</p>';L();return}
+ if(rid){try{const r=await fetch('/api?action=mine&c='+encodeURIComponent(CID)+'&id='+encodeURIComponent(rid));if(r.ok){fill((await r.json()).rec);$('consentBox').classList.add('hide')}else{rid=null;sessionStorage.removeItem('lc_rid_'+CID)}}catch(e){}}
+ L()}
+init();
+</script></body></html>
